@@ -17,7 +17,9 @@ namespace TestTradeServer
 
         public TestMetaTrader4Server()
         {
-            tradeContainer = new TradeContainer(new Server("127.0.0.1", "Test Server", ServerType.MetaTrader4), 1);
+            tradeContainer = new TradeContainer(
+                new Server("127.0.0.1", "Test Server", ServerType.MetaTrader4),
+                new Manager(Guid.NewGuid().ToString()), 1);
             trades = new List<IBaseTrade>();
             lockObj = new object();
             random = new Random();

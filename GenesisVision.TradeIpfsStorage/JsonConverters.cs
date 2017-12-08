@@ -30,5 +30,13 @@ namespace GenesisVision.TradeIpfsStorage
                 return new Trade();
             }
         }
+
+        public class ManagerConverter : CustomCreationConverter<IManager>
+        {
+            public override IManager Create(Type objectType)
+            {
+                return new Manager();
+            }
+        }
     }
 }

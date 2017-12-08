@@ -50,7 +50,8 @@ namespace GenesisVision.TradeIpfsStorage
             var tradeContainer = JsonConvert.DeserializeObject<ITradeContainer>(json,
                 new JsonConverters.TradeContainerConverter(),
                 new JsonConverters.ServerConverter(),
-                new JsonConverters.TradeConverter());
+                new JsonConverters.TradeConverter(),
+                new JsonConverters.ManagerConverter());
 
             logger.Info($"Hash {hash}. Load {tradeContainer.Trades.Count} trades");
 
