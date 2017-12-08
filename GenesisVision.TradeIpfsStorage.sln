@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27004.2010
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenesisVision.TradeIpfsStorage", "GenesisVision.TradeIpfsStorage\GenesisVision.TradeIpfsStorage.csproj", "{9BBEB1C6-7141-4080-BFB5-36146AB03EC9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenesisVision.TradeIpfsStorage", "GenesisVision.TradeIpfsStorage\GenesisVision.TradeIpfsStorage.csproj", "{9BBEB1C6-7141-4080-BFB5-36146AB03EC9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTradeServer", "TestTradeServer\TestTradeServer.csproj", "{84EF1D9D-EB8C-4000-90B9-DD082C4B0384}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestTradeServer", "TestTradeServer\TestTradeServer.csproj", "{84EF1D9D-EB8C-4000-90B9-DD082C4B0384}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenesisVision.TradeIpfsSync", "GenesisVision.TradeIpfsSync\GenesisVision.TradeIpfsSync.csproj", "{59169AAE-AC9C-4E02-ACAC-1E6E847C6168}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{84EF1D9D-EB8C-4000-90B9-DD082C4B0384}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84EF1D9D-EB8C-4000-90B9-DD082C4B0384}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84EF1D9D-EB8C-4000-90B9-DD082C4B0384}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59169AAE-AC9C-4E02-ACAC-1E6E847C6168}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59169AAE-AC9C-4E02-ACAC-1E6E847C6168}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59169AAE-AC9C-4E02-ACAC-1E6E847C6168}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59169AAE-AC9C-4E02-ACAC-1E6E847C6168}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
