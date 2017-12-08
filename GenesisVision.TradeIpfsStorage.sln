@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2010
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenesisVision.TradeIpfsStorage", "GenesisVision.TradeIpfsStorage\GenesisVision.TradeIpfsStorage.csproj", "{9BBEB1C6-7141-4080-BFB5-36146AB03EC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestTradeServer", "TestTradeServer\TestTradeServer.csproj", "{84EF1D9D-EB8C-4000-90B9-DD082C4B0384}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9BBEB1C6-7141-4080-BFB5-36146AB03EC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9BBEB1C6-7141-4080-BFB5-36146AB03EC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9BBEB1C6-7141-4080-BFB5-36146AB03EC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9BBEB1C6-7141-4080-BFB5-36146AB03EC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84EF1D9D-EB8C-4000-90B9-DD082C4B0384}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84EF1D9D-EB8C-4000-90B9-DD082C4B0384}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84EF1D9D-EB8C-4000-90B9-DD082C4B0384}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84EF1D9D-EB8C-4000-90B9-DD082C4B0384}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6509EB56-C4E0-496A-BAE5-E681E4DFF5B3}
+	EndGlobalSection
+EndGlobal
