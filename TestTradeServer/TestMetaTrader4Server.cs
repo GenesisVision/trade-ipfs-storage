@@ -41,8 +41,6 @@ namespace TestTradeServer
             {
                 TicketNum = random.Next(100000, 500000),
                 Ticket = "",
-                LoginNum = random.Next(500000, 900000),
-                Login = "",
                 DateOpen = DateTime.Now.AddMinutes(-random.Next(200, 500)),
                 DateClose = DateTime.Now.AddMinutes(random.Next(200, 500)),
                 Direction = Direction.Buy,

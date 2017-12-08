@@ -10,8 +10,6 @@ namespace GenesisVision.TradeIpfsStorage.Interfaces
 
     public interface IBaseTrade
     {
-        long LoginNum { get; set; }
-        string Login { get; set; }
         long TicketNum { get; set; }
         string Ticket { get; set; }
         string Symbol { get; set; }

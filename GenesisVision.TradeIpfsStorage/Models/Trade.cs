@@ -5,8 +5,6 @@ namespace GenesisVision.TradeIpfsStorage.Models
 {
     public class Trade : IBaseTrade
     {
-        public long LoginNum { get; set; }
-        public string Login { get; set; }
         public long TicketNum { get; set; }
         public string Ticket { get; set; }
         public string Symbol { get; set; }
