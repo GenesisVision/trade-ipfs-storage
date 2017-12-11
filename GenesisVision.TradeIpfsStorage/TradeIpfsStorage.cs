@@ -1,26 +1,63 @@
 ﻿using GenesisVision.TradeIpfsStorage.Interfaces;
 using Ipfs.Api;
+using Nethereum.Geth;
 using Newtonsoft.Json;
 using NLog;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
+using Nethereum.Contracts;
 
 namespace GenesisVision.TradeIpfsStorage
 {
     public class TradeIpfsStorage : ITradeIpfsStorage
     {
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
-        private readonly IpfsClient ipfs;
 
-        public TradeIpfsStorage(string host)
+        private readonly IpfsClient ipfs;
+        private readonly ContractHelper contractHelper;
+        
+        private readonly string serverId;
+        private Dictionary<string, string> managersIpfsHistory;
+        
+        public TradeIpfsStorage(string ipfsHost, string gethHost, string contractAddress, string serverId)
         {
-            ipfs = new IpfsClient(host);
+            logger.Info($"Initialize GenesisVision.TradeIpfsStorage...");
+            logger.Info($"IPFS host: {ipfsHost}");
+            logger.Info($"Geth host: {gethHost}");
+            logger.Info($"Contract Address: {contractAddress}");
+            logger.Info($"Server id: {serverId}");
+
+            ipfs = new IpfsClient(ipfsHost);
+            contractHelper = new ContractHelper(gethHost, contractAddress);
+            this.serverId = serverId;
+            managersIpfsHistory = new Dictionary<string, string>();
+            
+            var managers = GetServerManagers();
+            var managersData = contractHelper.GetManagers(managers);
         }
 
-        public TradeIpfsStorage()
+        private IEnumerable<string> GetServerManagers()
         {
-            ipfs = new IpfsClient();
+            // todo: getting managers from GV server
+
+            //var managers = GenesisVision.Core.GetManagers(serverId);
+
+            var managers = new List<string>
+                           {
+                               "8E916E5F-C12C-488A-B298-438CB4F51A75",
+                               "AE4DB832-2D99-4971-A74E-A4B2D6FEB3C1",
+                               "CD16E803-9BCC-41EB-AE78-6E559ACB95FF"
+                           };
+            logger.Info($"Loaded {managers.Count} managers");
+
+            return managers;
+        }
+
+        private void GetManagersIpfsHash(IEnumerable<string> managerIds)
+        {
         }
 
         public string UploadTrades(ITradeContainer tradeContainer, CancellationToken cancel = default(CancellationToken))
