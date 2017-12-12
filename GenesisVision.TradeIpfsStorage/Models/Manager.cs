@@ -1,18 +1,8 @@
-﻿using GenesisVision.TradeIpfsStorage.Interfaces;
-
-namespace GenesisVision.TradeIpfsStorage.Models
+﻿namespace GenesisVision.TradeIpfsStorage.Models
 {
-    public class Manager: IManager
+    internal class Manager
     {
+        public string IpfsHash { get; set; }
         public string ManagerId { get; set; }
-
-        internal Manager()
-        {
-        }
-
-        public Manager(string managerId)
-        {
-            ManagerId = managerId;
-        }
     }
 }

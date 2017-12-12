@@ -1,11 +1,10 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using GenesisVision.TradeIpfsStorage.Interfaces.Trades;
 
 namespace GenesisVision.TradeIpfsStorage.Interfaces
 {
     public interface ITradeIpfsStorage
     {
-        string UploadTrades(ITradeContainer tradeContainer, CancellationToken cancel = default(CancellationToken));
-
-        ITradeContainer GetTrades(string hash, CancellationToken cancel = default(CancellationToken));
+        void StoreNewTrades(IEnumerable<IMetaTraderOrder> trades);
     }
 }

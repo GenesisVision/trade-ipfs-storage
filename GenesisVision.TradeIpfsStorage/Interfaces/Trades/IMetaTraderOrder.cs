@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GenesisVision.TradeIpfsStorage.Interfaces
+namespace GenesisVision.TradeIpfsStorage.Interfaces.Trades
 {
     public enum Direction
     {
@@ -8,10 +8,10 @@ namespace GenesisVision.TradeIpfsStorage.Interfaces
         Sell = 1
     }
 
-    public interface IBaseTrade
+    public interface IMetaTraderOrder
     {
-        long TicketNum { get; set; }
-        string Ticket { get; set; }
+        long Login { get; set; }
+        long Ticket { get; set; }
         string Symbol { get; set; }
         decimal PriceOpen { get; set; }
         decimal PriceClose { get; set; }

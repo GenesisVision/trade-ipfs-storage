@@ -1,12 +1,12 @@
 ﻿using System;
-using GenesisVision.TradeIpfsStorage.Interfaces;
+using GenesisVision.TradeIpfsStorage.Interfaces.Trades;
 
-namespace GenesisVision.TradeIpfsStorage.Models
+namespace GenesisVision.TradeIpfsStorage.Models.Trades
 {
-    public class Trade : IBaseTrade
+    public class MetaTraderOrder : IMetaTraderOrder
     {
-        public long TicketNum { get; set; }
-        public string Ticket { get; set; }
+        public long Ticket { get; set; }
+        public long Login { get; set; }
         public string Symbol { get; set; }
         public decimal PriceOpen { get; set; }
         public decimal PriceClose { get; set; }

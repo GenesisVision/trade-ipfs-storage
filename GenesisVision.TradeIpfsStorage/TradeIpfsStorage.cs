@@ -1,14 +1,18 @@
-﻿using GenesisVision.TradeIpfsStorage.Interfaces;
-using Ipfs.Api;
+﻿using GenesisVision.PlatformContract;
+using GenesisVision.TradeIpfsStorage.Interfaces;
+using GenesisVision.TradeIpfsStorage.Interfaces.Trades;
+using GenesisVision.TradeIpfsStorage.Models;
+using GenesisVision.TradeIpfsStorage.Services;
 using Nethereum.Geth;
-using Newtonsoft.Json;
+using Nethereum.JsonRpc.Client;
+using Nethereum.Web3.Accounts.Managed;
 using NLog;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Threading;
-using Nethereum.Contracts;
+using System.Timers;
+using Nethereum.Hex.HexTypes;
+using Nethereum.Web3;
 
 namespace GenesisVision.TradeIpfsStorage
 {
@@ -16,83 +20,140 @@ namespace GenesisVision.TradeIpfsStorage
     {
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        private readonly IpfsClient ipfs;
-        private readonly ContractHelper contractHelper;
+        private readonly PlatformContractService platformContractService;
+        private readonly IpfsService ipfsService;
+
+        private readonly string brokerAddress;
         
-        private readonly string serverId;
-        private Dictionary<string, string> managersIpfsHistory;
-        
-        public TradeIpfsStorage(string ipfsHost, string gethHost, string contractAddress, string serverId)
+        private readonly Dictionary<long, Manager> managersByLogin;
+        private readonly Dictionary<string, long> managersById;
+
+        private readonly HashSet<long> managersQueue;
+        private readonly object managersQueueLock;
+
+        private readonly Timer updateContractTimer;
+
+        public TradeIpfsStorage(string ipfsHost, string gethHost, string contractAddress, string brokerAddress, string brokerPassword, string serverId)
         {
             logger.Info($"Initialize GenesisVision.TradeIpfsStorage...");
+
             logger.Info($"IPFS host: {ipfsHost}");
             logger.Info($"Geth host: {gethHost}");
+            logger.Info($"Broker manager account: {brokerAddress}");
             logger.Info($"Contract Address: {contractAddress}");
             logger.Info($"Server id: {serverId}");
 
-            ipfs = new IpfsClient(ipfsHost);
-            contractHelper = new ContractHelper(gethHost, contractAddress);
-            this.serverId = serverId;
-            managersIpfsHistory = new Dictionary<string, string>();
+            var web3 = new Web3Geth(new ManagedAccount(brokerAddress, brokerPassword), gethHost);
+
+            platformContractService = new PlatformContractService(web3, contractAddress);
+            ipfsService = new IpfsService(ipfsHost);
+            managersByLogin = new Dictionary<long, Manager>();
+            managersById = new Dictionary<string, long>();
+
+            this.brokerAddress = brokerAddress;
             
-            var managers = GetServerManagers();
-            var managersData = contractHelper.GetManagers(managers);
+            managersQueue = new HashSet<long>();
+            managersQueueLock = new object();
+            updateContractTimer = new Timer(60 * 1000);
+            updateContractTimer.Elapsed += (sender, args) => UploadNewTradesToContract();
+
+            InitManagers(serverId);
+            updateContractTimer.Start();
         }
 
-        private IEnumerable<string> GetServerManagers()
+        #region Init
+
+        private void InitManagers(string serverId)
         {
             // todo: getting managers from GV server
-
-            //var managers = GenesisVision.Core.GetManagers(serverId);
-
             var managers = new List<string>
                            {
+                               "m1",
                                "8E916E5F-C12C-488A-B298-438CB4F51A75",
                                "AE4DB832-2D99-4971-A74E-A4B2D6FEB3C1",
                                "CD16E803-9BCC-41EB-AE78-6E559ACB95FF"
                            };
-            logger.Info($"Loaded {managers.Count} managers");
+            logger.Debug($"Loaded {managers.Count} manager ids");
 
-            return managers;
+            foreach (var managerId in managers)
+            {
+                var managersLogin = platformContractService.GetManagerLoginAsyncCall(managerId).Result;
+                if (!string.IsNullOrEmpty(managersLogin) && long.TryParse(managersLogin, out var login))
+                {
+                    var ipfsHash = platformContractService.GetManagerHistoryIpfsHashAsyncCall(managerId).Result;
+                    managersById[managerId] = login;
+                    managersByLogin[login] = new Manager {ManagerId = managerId, IpfsHash = ipfsHash};
+                }
+            }
+
+            logger.Debug($"Loaded {managersById.Count} managers: {string.Join(", ", managersById.Select(x => $"{x.Key} ({x.Value})"))}");
         }
 
-        private void GetManagersIpfsHash(IEnumerable<string> managerIds)
+        #endregion
+
+        #region Store new trades
+
+        public void StoreNewTrades(IEnumerable<IMetaTraderOrder> trades)
         {
+            var tradesByLogin = trades.GroupBy(x => x.Login,
+                                          (k, v) => new
+                                                    {
+                                                        Login = k,
+                                                        Orders = v.OrderByDescending(x => x.DateClose).ToList()
+                                                    })
+                                      .ToList();
+            foreach (var tradeData in tradesByLogin.Where(x => managersByLogin.ContainsKey(x.Login)))
+            {
+                var manager = managersByLogin[tradeData.Login];
+
+                logger.Debug($"New {tradeData.Orders.Count} trades. Manager: {manager.ManagerId} ({tradeData.Login}), prev ipfs: {manager.IpfsHash}");
+
+                var lastHistoryHash = manager.IpfsHash;
+                var tradeHistory = !string.IsNullOrEmpty(lastHistoryHash)
+                    ? ipfsService.GetTextDataFromIpfs(lastHistoryHash)
+                    : "";
+
+                var history = TradesExporterService.ExportToCsv(tradeData.Orders, tradeHistory);
+
+                var ipfsHash = ipfsService.UploadTrades(history, manager.ManagerId);
+
+                manager.IpfsHash = ipfsHash;
+
+                lock (managersQueueLock)
+                {
+                    managersQueue.Add(tradeData.Login);
+                }
+            }
         }
 
-        public string UploadTrades(ITradeContainer tradeContainer, CancellationToken cancel = default(CancellationToken))
+        public void UploadNewTradesToContract()
         {
-            if (tradeContainer.Trades == null || tradeContainer.Server == null)
-                throw new ArgumentNullException();
+            logger.Debug("Start upload trades to contract");
+            try
+            {
+                List<long> tmpManagers;
+                lock (managersQueueLock)
+                {
+                    tmpManagers = managersQueue.ToList();
+                    managersQueue.Clear();
+                }
 
-            logger.Info($"Upload trades. Server: {tradeContainer.Server.Name}, " +
-                        $"SchemeVersion: {tradeContainer.SchemeVersion}, " +
-                        $"Trades: {tradeContainer.Trades.Count}");
-            if (!tradeContainer.Trades.Any())
-                return null;
+                foreach (var login in tmpManagers)
+                {
+                    var manager = managersByLogin[login];
 
-            var json = JsonConvert.SerializeObject(tradeContainer);
-            var res = ipfs.FileSystem.AddTextAsync(json, cancel).Result;
-
-            logger.Info($"Uploaded successfully. Hash {res.Hash}");
-
-            return res.Hash;
+                    logger.Debug($"Start updating contract. Manager: {manager.ManagerId} ({login}), ipfs: {manager.IpfsHash}");
+                    var hash = platformContractService.UpdateManagerHistoryIpfsHashAsync(brokerAddress, manager.ManagerId,
+                        manager.IpfsHash, new HexBigInteger(300000)).Result;
+                    logger.Info($"Contract updated. Manager: {manager.ManagerId} ({login}), ipfs: {manager.IpfsHash}, tx hash: {hash}");
+                }
+            }
+            catch (Exception e)
+            {
+                logger.Error("Error at UploadNewTradesToContract. " + e.StackTrace);
+            }
         }
 
-        public ITradeContainer GetTrades(string hash, CancellationToken cancel = default(CancellationToken))
-        {
-            logger.Info($"Getting trades by hash {hash}...");
-
-            var json = ipfs.FileSystem.ReadAllTextAsync(hash, cancel).Result;
-            var tradeContainer = JsonConvert.DeserializeObject<ITradeContainer>(json,
-                new JsonConverters.TradeContainerConverter(),
-                new JsonConverters.ServerConverter(),
-                new JsonConverters.TradeConverter(),
-                new JsonConverters.ManagerConverter());
-
-            logger.Info($"Hash {hash}. Load {tradeContainer.Trades.Count} trades");
-
-            return tradeContainer;
-        }
+        #endregion
     }
 }
