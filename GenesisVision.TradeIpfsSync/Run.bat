@@ -1,1 +1,1 @@
-dotnet TestTradeServer.dll
+dotnet GenesisVision.TradeIpfsSync.dll

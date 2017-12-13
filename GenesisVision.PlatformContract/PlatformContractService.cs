@@ -431,4 +431,9 @@ namespace GenesisVision.PlatformContract
         public string BrokerId { get; set; }
     }
 
+    public class ManagerUpdatedEventDTO
+    {
+        [Parameter("string", "managerId", 1, false)]
+        public string ManagerId { get; set; }
+    }
 }

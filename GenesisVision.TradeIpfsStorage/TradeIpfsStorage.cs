@@ -4,15 +4,13 @@ using GenesisVision.TradeIpfsStorage.Interfaces.Trades;
 using GenesisVision.TradeIpfsStorage.Models;
 using GenesisVision.TradeIpfsStorage.Services;
 using Nethereum.Geth;
-using Nethereum.JsonRpc.Client;
+using Nethereum.Hex.HexTypes;
 using Nethereum.Web3.Accounts.Managed;
 using NLog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
-using Nethereum.Hex.HexTypes;
-using Nethereum.Web3;
 
 namespace GenesisVision.TradeIpfsStorage
 {
@@ -69,6 +67,7 @@ namespace GenesisVision.TradeIpfsStorage
             var managers = new List<string>
                            {
                                "m1",
+                               "m2",
                                "8E916E5F-C12C-488A-B298-438CB4F51A75",
                                "AE4DB832-2D99-4971-A74E-A4B2D6FEB3C1",
                                "CD16E803-9BCC-41EB-AE78-6E559ACB95FF"
@@ -77,8 +76,8 @@ namespace GenesisVision.TradeIpfsStorage
 
             foreach (var managerId in managers)
             {
-                var managersLogin = platformContractService.GetManagerLoginAsyncCall(managerId).Result;
-                if (!string.IsNullOrEmpty(managersLogin) && long.TryParse(managersLogin, out var login))
+                var managerLogin = platformContractService.GetManagerLoginAsyncCall(managerId).Result;
+                if (!string.IsNullOrEmpty(managerLogin) && long.TryParse(managerLogin, out var login))
                 {
                     var ipfsHash = platformContractService.GetManagerHistoryIpfsHashAsyncCall(managerId).Result;
                     managersById[managerId] = login;
@@ -150,7 +149,7 @@ namespace GenesisVision.TradeIpfsStorage
             }
             catch (Exception e)
             {
-                logger.Error("Error at UploadNewTradesToContract. " + e.StackTrace);
+                logger.Error($"Error at UploadNewTradesToContract: {e.Message} {Environment.NewLine}{e.StackTrace}");
             }
         }
 
