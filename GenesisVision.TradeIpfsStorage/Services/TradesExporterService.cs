@@ -1,7 +1,8 @@
-﻿using System;
+﻿using GenesisVision.TradeIpfsStorage.Interfaces.Trades;
+using System;
 using System.Collections.Generic;
 using System.Text;
-using GenesisVision.TradeIpfsStorage.Interfaces.Trades;
+using System.Threading;
 
 namespace GenesisVision.TradeIpfsStorage.Services
 {
@@ -9,6 +10,8 @@ namespace GenesisVision.TradeIpfsStorage.Services
     {
         public static string ExportToCsv(IEnumerable<IMetaTraderOrder> trades, string text = null)
         {
+            Thread.CurrentThread.CurrentCulture = System.Globalization.CultureInfo.CreateSpecificCulture("en-US");
+
             var csv = new StringBuilder(!string.IsNullOrEmpty(text)
                 ? text
                 : $"\"Login\";\"Ticket\";\"Symbol\";\"PriceOpen\";\"PriceClose\";\"Profit\";\"Volume\";\"DateOpen\";\"DateClose\";\"Direction\";{Environment.NewLine}");
@@ -21,8 +24,8 @@ namespace GenesisVision.TradeIpfsStorage.Services
                                $"\"{trade.PriceClose}\";" +
                                $"\"{trade.Profit}\";" +
                                $"\"{trade.Volume}\";" +
-                               $"\"{trade.DateOpen}\";" +
-                               $"\"{trade.DateClose}\";" +
+                               $"\"{trade.DateOpen:G}\";" +
+                               $"\"{trade.DateClose:G}\";" +
                                $"\"{trade.Direction}\";");
             }
             return csv.ToString();
