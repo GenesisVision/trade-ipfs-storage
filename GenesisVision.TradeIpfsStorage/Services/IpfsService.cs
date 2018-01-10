@@ -23,9 +23,9 @@ namespace GenesisVision.TradeIpfsStorage.Services
             
             var res = ipfs.FileSystem.AddTextAsync(text).Result;
 
-            logger.Info($"Trades to IPFS uploaded. Manager id: {managerId}, hash {res.Hash}");
+            logger.Info($"Trades to IPFS uploaded. Manager id: {managerId}, hash {res.Id.Hash}");
 
-            return res.Hash;
+            return res.Id.Hash.ToString();
         }
 
         public string GetTextDataFromIpfs(string hash)
